@@ -11,7 +11,9 @@ from multiprocessing import Process
 from test_oli import main_process
 
 # TODO: add degassing valve option
-# put all valves to close when start
+# add timestep as input
+#make look nicer
+
 
 """
 print(time.time())
