@@ -389,6 +389,8 @@ class TimeSetup(QMainWindow, QWidget):
     def stopEvent(self):
         print('STOPPING')
         self.process_trigger_event.terminate()
+        #closeEvent()
+        closeEvent2()
 
 if __name__ == '__main__':
 

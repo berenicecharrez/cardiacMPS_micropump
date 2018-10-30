@@ -1,30 +1,39 @@
 from time import sleep
 
+try:
+	import RPi.GPIO as GPIO
+	valves = [4,17,27,22,10,9,11,5,6,13,19,26,21,20,16,12,14,15,18,23,24,25,8]
+	GPIO.setmode(GPIO.BCM)
+	for x in valves:
+	    GPIO.setup(x, GPIO.OUT)
+	    GPIO.output(x, 0)
+except:
+	pass
 
-import RPi.GPIO as GPIO
-valves = [4,17,27,22,10,9,11,5,6,13,19,26,21,20,16,12,14,15,18,23,24,25,8]
-GPIO.setmode(GPIO.BCM)
-for x in valves:
-    GPIO.setup(x, GPIO.OUT)
-    GPIO.output(x, 0)  
+def set_gpio_output(valve, state):
+	try:
+		GPIO.output(valve, state)
+	except:
+		pass#print('cant access GPIO')
+
 
 def degasing(lock, valve = 5):
 	print('degasing started')
 
 	while lock.locked():
-		#pass
-		GPIO.output(valve, 0)
+		set_gpio_output(valve, 0)
+
 	print('degasing stopped')
 
 def openValves(valve):
 	#valves = [4,17,27,22,10,9,11,5,6,13,19,26,21,20,16,12,14,15,18,23,24,25,8]
 	print('Valve is opening: {}'.format(valve))
-	GPIO.output(valve, 0)
+	set_gpio_output(valve, 0)
 
 def closeValves(valve):
 	print('valve is closing')
 
-	GPIO.output(valve, 1)
+	set_gpio_output(valve, 1)
 
 def pumping(stepTime, lock):
 
@@ -36,15 +45,15 @@ def pumping(stepTime, lock):
 	while lock.locked():
 		#pass
 
-		GPIO.output(p1, 0)
-		GPIO.output(p3, 1)
+		set_gpio_output(p1, 0)
+		set_gpio_output(p3, 1)
 		sleep(stepTime)
-		GPIO.output(p2, 0)
+		set_gpio_output(p2, 0)
 		sleep(stepTime)
-		GPIO.output(p1, 1)
-		GPIO.output(p3, 0)
+		set_gpio_output(p1, 1)
+		set_gpio_output(p3, 0)
 		sleep(stepTime)
-		GPIO.output(p2, 1)
+		set_gpio_output(p2, 1)
 		sleep(stepTime)
 
 	print('pumping finished')
