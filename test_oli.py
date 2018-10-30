@@ -27,13 +27,13 @@ def main_process(set_actions):
 
     print('You are in main process!')
 
-try:
-    import RPi.GPIO as GPIO
-except RuntimeError:
-    print("Error")
+    try:
+        import RPi.GPIO as GPIO
+    except RuntimeError:
+        print("Error")
+        
 
     """
-    time_init = time.time()
     list_finish_time = []
     # main loop
 
@@ -87,7 +87,14 @@ except RuntimeError:
         time.sleep(1)
 
         """
-
+       #degasing
+    lock1=thread.allocate_lock()
+    lock1.acquire()
+    t1=thread.start_new_thread(degasing,(lock1,))
+    
+    time_init = time.time()
+    list_finish_time = []
+    
     while set_actions != {} or len(list_finish_time) > 0:
 
         active_locks = []
@@ -153,3 +160,7 @@ except RuntimeError:
 
     print ('{} I am done'.format(time.time() - time_init))
     lock1.release()
+    
+#    while thread.active_count():
+#        pass
+#    print('ok done final')

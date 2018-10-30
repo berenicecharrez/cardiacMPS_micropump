@@ -71,9 +71,9 @@ class Action(QMainWindow, QWidget):
         self.ListAction = {} #dictionary
 
         #default dictionary
-        self.ListAction["OPEN"] = formatActionParam ('VALVE_ACTION', 0, 20, 0, 3, 'OPENING')
+        self.ListAction["OPEN"] = formatActionParam ('VALVE_ACTION', 0, 20, 0, 4, 'OPENING')
         self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 16, 5, 0, 'NO_VALVE')
-        self.ListAction["CLOSE"] = formatActionParam ('VALVE_ACTION', 0, 5, 20, 3, 'CLOSING')
+        self.ListAction["CLOSE"] = formatActionParam ('VALVE_ACTION', 0, 5, 20, 4, 'CLOSING')
 
         self.wid = QWidget()
         self.time_setup = None

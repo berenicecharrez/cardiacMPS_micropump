@@ -1,5 +1,13 @@
 from time import sleep
 
+
+import RPi.GPIO as GPIO
+valves = [4,17,27,22,10,9,11,5,6,13,19,26,21,20,16,12,14,15,18,23,24,25,8]
+GPIO.setmode(GPIO.BCM)
+for x in valves:
+    GPIO.setup(x, GPIO.OUT)
+    GPIO.output(x, 0)  
+
 def degasing(lock, valve = 5):
 	print('degasing started')
 
@@ -8,17 +16,15 @@ def degasing(lock, valve = 5):
 		GPIO.output(valve, 0)
 	print('degasing stopped')
 
-def openValves(valves):
+def openValves(valve):
 	#valves = [4,17,27,22,10,9,11,5,6,13,19,26,21,20,16,12,14,15,18,23,24,25,8]
-	print('Valve is opening')
-	for x in valves:
-		GPIO.output(x, 0)
+	print('Valve is opening: {}'.format(valve))
+	GPIO.output(valve, 0)
 
-def closeValves(valves):
+def closeValves(valve):
 	print('valve is closing')
 
-	for x in valves:
-		GPIO.output(x, 1)
+	GPIO.output(valve, 1)
 
 def pumping(stepTime, lock):
 
