@@ -41,8 +41,7 @@ except RuntimeError:
     lock1=thread.allocate_lock()
     lock1.acquire()
     t1=thread.start_new_thread(degasing,(lock1,))
-
-
+    
     ordered_list = order_actions(set_actions)
 
     for local_action in set_actions:
