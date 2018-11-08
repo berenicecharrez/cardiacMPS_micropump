@@ -25,15 +25,19 @@ def degasing(lock, valve = 5):
 
 	print('degasing stopped')
 
-def openValves(valve):
+def openValves(valve, lock1):
 	#valves = [4,17,27,22,10,9,11,5,6,13,19,26,21,20,16,12,14,15,18,23,24,25,8]
-	print('Valve is opening: {}'.format(valve))
-	set_gpio_output(valve, 0)
 
-def closeValves(valve):
-	print('valve is closing')
+	while lock1.locked():
+		set_gpio_output(valve, 0)
 
 	set_gpio_output(valve, 1)
+	#print('Valve is closed2: {}'.format(valve))
+
+#def closeValves(valve):
+#	print('valve is closing')
+
+#	set_gpio_output(valve, 1)
 
 def pumping(stepTime, lock):
 

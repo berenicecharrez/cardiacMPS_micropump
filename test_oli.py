@@ -1,7 +1,7 @@
 import time
 import _thread as thread
 from collections import defaultdict
-from basicFunctions import degasing, openValves, closeValves, pumping
+from basicFunctions import degasing, openValves, pumping #closeValves
 import heapq
 
 """
@@ -28,12 +28,19 @@ def start_pumping (timestep):
 
     return lock
 
+def opening_valve (valve):
+    lock1 = thread.allocate_lock()
+    lock1.acquire()
+    thread.start_new_thread(openValves,(valve, lock1))
+
+    return lock1
 """
 Main process launching Raspberry pie
 """
 
 def main_process(set_actions):
 
+    #status = 0
     print('You are in main process!')
 
     try:
@@ -56,7 +63,8 @@ def main_process(set_actions):
 
         current_action = heapq.heappop(action_heap) #get the first item from the heap
 
-        active_locks = []
+        active_locks_pump = []
+        active_locks_valves = []
 
         time_current = time.time() - time_init
         #print("It is {}".format(time_current))
@@ -64,7 +72,7 @@ def main_process(set_actions):
         #for more efficiency: only go through the while loop when an event is going to happen,
         #no need of going through it every msec
         time_difference = max(0, current_action[0] - time_current)
-        print("time", time_current, current_action[0])
+        #print("time", time_current, current_action[0])
         time.sleep(time_difference)
 
         # Trigger les events
@@ -75,22 +83,36 @@ def main_process(set_actions):
 
         if saca['type'] == 'PUMP':
             if current_action[2] == 'start':
-                print('pumping to be started')
+                #print('pumping to be started')
                 lock = start_pumping(0.2) #timestep = 0.2
-                active_locks.append(lock)
+                active_locks_pump.append(lock)
 
             if current_action[2] == 'finish': #if past duration --> stop
-                print('pumping to be stopped')
-                for lock in active_locks:
+                #print('pumping to be stopped')
+                for lock in active_locks_pump:
                     lock.release()
 
         elif saca['type'] == 'VALVE_ACTION':
-            if saca['valve option'] == 'OPENING':
+            if current_action[2] == 'start':# and saca['valve option'] == 'OPENING':
+                #print('valve to be opened')
+                lock1 = opening_valve(saca['valve number'])
+                active_locks_valves.append(lock1)
+                print('Valve is opening: {}'.format(saca['valve number']))
+
+            if current_action[2] == 'finish': #or saca['valve option'] == 'CLOSING': if past duration --> stop
+                #print('valve to be closed')
+                for lock1 in active_locks_valves:
+                    lock1.release()
+                print('Valve is closed1: {}'.format(saca['valve number']))
+
+
+            """if saca['valve option'] == 'OPENING':
                 print ('{} Je call VALVE_OPENING'.format(time_current))
                 openValves(saca['valve number'])
             if saca['valve option'] == 'CLOSING':
                 print ('{} Je call VALVE_CLOSING'.format(time_current))
                 closeValves(saca['valve number'])
+            """
 
         else:
             print ('{} Unknown action'.format(time_current))
@@ -101,7 +123,10 @@ def main_process(set_actions):
 
     print ('{} I am done'.format(time.time() - time_init))
     lock1.release()
+    time.sleep(2)
+    #status = 1
 
+    #return status
 
 """
        #degasing

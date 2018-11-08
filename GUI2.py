@@ -26,7 +26,7 @@ print("Universal datetime: ", now.toUTC().toString(Qt.ISODate))
 #difference between universal time and local time in seconds
 print("The offset from UTC is: {0} seconds".format(now.offsetFromUtc()))
 """
-def formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number = None, valve_option = None):
+def formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number = None):#, valve_option = None):
     ret = {}
 
     ret['type'] = ac_type
@@ -34,23 +34,23 @@ def formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number = None, va
     ret['seconds'] = ac_sec
     ret['start'] = t_start
     ret['valve number'] = valve_number
-    ret['valve option'] = valve_option
+    #ret['valve option'] = valve_option
 
     return ret
 
-def formatDict (listAction):
-    aux = ''
+def formatDict (listAction, bond_duration):
+    aux = 'Bond Duration is of {} hours\n'.format(bond_duration)
 
     for _name, _list_param in listAction.items():
 
-        if _list_param['valve option'] == None:
+        if _list_param['type'] == 'PUMP':
 
             aux += '{0}: {1} for a duration of {2} [min] {3} [sec], starting at {4} [sec]\n'.format(_name, _list_param['type'],
                 _list_param['minutes'], _list_param['seconds'], _list_param['start'])
 
         else:
-            aux += '{0}: {1} -->  There will be {2} of Valve # {3} for a duration of {4} [min] {5} [sec], starting at {6} [sec]\n'.format(_name, _list_param['type'],
-                _list_param['valve option'], _list_param['valve number'], _list_param['minutes'], _list_param['seconds'], _list_param['start'])
+            aux += '{0}: {1} -->  There will be opening of Valve # {2} for a duration of {3} [min] {4} [sec], starting at {5} [sec]\n'.format(_name, _list_param['type'], \
+            _list_param['valve number'], _list_param['minutes'], _list_param['seconds'], _list_param['start'])
 
     return aux
 
@@ -65,17 +65,19 @@ class Action(QMainWindow, QWidget):
         self.ac_duration_min_obj = None
         self.ac_duration_sec_obj = None
         self.valve_number_obj = None
-        self.valve_option_action_obj = None
+        #self.valve_option_action_obj = None
         self.t_start_obj = None
+        self.bond_duration_obj = None
+
 
         self.ActionDisplay = ''
 
         self.ListAction = {} #dictionary
 
         #default dictionary
-        self.ListAction["OPEN"] = formatActionParam ('VALVE_ACTION', 0, 20, 0, 4, 'OPENING')
-        self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 16, 5, 0, 'NO_VALVE')
-        self.ListAction["CLOSE"] = formatActionParam ('VALVE_ACTION', 0, 5, 20, 4, 'CLOSING')
+        #self.ListAction["OPEN"] = formatActionParam ('VALVE_ACTION', 0, 20, 0, 4)#, 'OPENING')
+        #self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 16, 5, 0)#, 'NO_VALVE')
+        #self.ListAction["OPEN2"] = formatActionParam ('VALVE_ACTION', 0, 20, 10, 17)#, 'OPENING')
 
         self.wid = QWidget()
         self.time_setup = None
@@ -99,7 +101,7 @@ class Action(QMainWindow, QWidget):
         self.ac_name_obj = AcNameEdit
 
         AcType = QLabel('Action Type', self)
-        AcTypes = ['PUMPING', 'VALVE ACTION']
+        AcTypes = ['PUMP', 'VALVE ACTION']
         # Create and fill the combo box to choose the tyoe of action
         AcTypeBox = QComboBox()
         AcTypeBox.addItems(AcTypes)
@@ -138,14 +140,14 @@ class Action(QMainWindow, QWidget):
         self.t_start_obj = TStartEdit
 
         #valve options
-        IfValve = QLabel('If Action type is "Valve" ONLY, select options below. \n' 'Keep the Valve number at 0 if PUMPNG selected',self)
+        """IfValve = QLabel('If Action type is "Valve" ONLY, select options below. \n' 'Keep the Valve number at 0 if PUMPNG selected',self)
 
         ValveOption = QLabel('Valve Option')
         ValveOptions = ['NO VALVE','OPENING', 'CLOSING']
         ValveOptionBox = QComboBox()
         ValveOptionBox.addItems(ValveOptions)
         self.valve_option_action_obj = ValveOptionBox
-
+        """
         ValveNumber = QLabel('Valve Number', self)
         ValveNumberLCD = QLCDNumber()
         ValveNumberLCD.setSegmentStyle(QLCDNumber.Flat)
@@ -165,6 +167,16 @@ class Action(QMainWindow, QWidget):
         Valvebtn = QPushButton('Add Action', self)
         Valvebtn.clicked.connect(self.AddAction)
         Valvebtn.resize(Valvebtn.sizeHint())
+
+#chip bonding button
+        Bondingbtn = QPushButton('Chip Bonding', self)
+        Bondingbtn.clicked.connect(self.chip_bonding)
+        Bondingbtn.resize(Bondingbtn.sizeHint())
+
+#bonding duration
+        BondDuration = QLabel('Bond Duration [h]', self)
+        BondDurationEdit = QLineEdit()
+        self.bond_duration_obj = BondDurationEdit
 
 #quit button
 
@@ -203,20 +215,25 @@ class Action(QMainWindow, QWidget):
         grid.addWidget(TStart, 4, 0)
         grid.addWidget(TStartEdit, 4, 1)
 
-        grid.addWidget(IfValve, 5, 0)
+        #grid.addWidget(IfValve, 5, 0)
 
-        grid.addWidget(ValveOption,6, 0 )
-        grid.addWidget(ValveOptionBox, 6, 1)
+        #grid.addWidget(ValveOption,6, 0 )
+        #grid.addWidget(ValveOptionBox, 6, 1)
         grid.addWidget(ValveNumber, 6, 2)
         grid.addWidget(ValveNumberLCD, 6, 3)
         grid.addWidget(sliderValveNumber, 6, 4)
 
-        grid.addWidget(AcList, 8, 0)
-        grid.addWidget(AcListEdit, 8, 1, 1, 4)
+        grid.addWidget(Bondingbtn, 8, 3)
+        grid.addWidget(BondDuration, 8, 1)
+        grid.addWidget(BondDurationEdit, 8, 2)
+
+        grid.addWidget(AcList, 9, 0)
+        grid.addWidget(AcListEdit, 9, 1, 1, 4)
 
         grid.addWidget(Valvebtn, 7, 1)
-        grid.addWidget(qbtn, 10, 7)
-        grid.addWidget(nextbtn, 9, 1)
+        grid.addWidget(qbtn, 11, 7)
+        grid.addWidget(nextbtn, 10, 1)
+
 
         #print(sliderAcDur.value())
 
@@ -272,26 +289,51 @@ class Action(QMainWindow, QWidget):
 
         ac_name = self.ac_name_obj.text()
         ac_type = self.ac_type_obj.currentText()
-        valve_option = self.valve_option_action_obj.currentText()
+        #valve_option = self.valve_option_action_obj.currentText()
         valve_number = self.valve_number_obj.value()
         ac_min = self.ac_duration_min_obj.value()
         ac_sec = self.ac_duration_sec_obj.value()
         t_start = self.t_start_obj.text()
+        bondTime = self.bond_duration_obj.text()
 
         try:
             t_start = int(t_start)
-
-            if valve_option == 'NO VALVE':
+            bondTime = int(bondTime)
+            """if valve_option == 'NO VALVE':
                 valve_option = None
                 valve_number = None
-
-            self.ListAction[self.ac_name_obj.text()] = formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number, valve_option)
-            self.ActionDisplay.setText(formatDict(self.ListAction))
+            """
+            self.ListAction[self.ac_name_obj.text()] = formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number)#, valve_option)
+            self.ActionDisplay.setText(formatDict(self.ListAction, bondTime))
 
         except ValueError:
             error = QMessageBox()
-            error.setText("Please enter a number for Time Start")
+            error.setText("Please enter a number for Time Start or 0 for chip bonding time")
             error.exec_()
+
+    def chip_bonding(self):
+
+        bond_duration = self.bond_duration_obj.text()
+
+        print('called chip bonding')
+
+        self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 25, 0, 0)    #pump starting at 0 for 25[sec]
+
+        self.ListAction["I1"] = formatActionParam ('VALVE_ACTION', 0, 3, 0, 17) #ac_type, ac_min, ac_sec, t_start, valve_number = None
+        self.ListAction["O1"] = formatActionParam ('VALVE_ACTION', 0, 3, 3, 6)
+        self.ListAction["O2"] = formatActionParam ('VALVE_ACTION', 0, 3, 3, 13)
+        self.ListAction["I2"] = formatActionParam ('VALVE_ACTION', 0, 3, 6, 4)
+        self.ListAction["O3"] = formatActionParam ('VALVE_ACTION', 0, 3, 9, 19)
+        self.ListAction["O4"] = formatActionParam ('VALVE_ACTION', 0, 3, 9, 12)
+        self.ListAction["I3"] = formatActionParam ('VALVE_ACTION', 0, 3, 12, 27)
+        self.ListAction["O5"] = formatActionParam ('VALVE_ACTION', 0, 3, 15, 14)
+        self.ListAction["O6"] = formatActionParam ('VALVE_ACTION', 0, 3, 15, 15)
+        self.ListAction["I4"] = formatActionParam ('VALVE_ACTION', 0, 3, 18, 22)
+        self.ListAction["O7"] = formatActionParam ('VALVE_ACTION', 0, 3, 21, 18)
+        self.ListAction["O8"] = formatActionParam ('VALVE_ACTION', 0, 3, 21, 23)
+        #time.sleep(5)
+
+        self.ActionDisplay.setText(formatDict(self.ListAction, bond_duration))
 
 #if press Next button go to next window for time setup
     def GoToNext (self):
@@ -314,19 +356,20 @@ class Action(QMainWindow, QWidget):
     def NewWindow(self):
         #action = Action()
         #action.close()
-        self.time_setup = TimeSetup(self.ListAction)
+        self.time_setup = TimeSetup(self.ListAction, self.bond_duration_obj)
         self.time_setup.show()
 #------------------------------------------------------------------------------------
 
 class TimeSetup(QMainWindow, QWidget):
 
-    def __init__(self, set_action):
+    def __init__(self, set_action, bond_duration):
         super().__init__()
 
         self.wid2 = QWidget()
         self.ActionDisplay2 = ''
         self.set_action = set_action
         self.process_trigger_event = None
+        self.bond_duration_obj2 = bond_duration.text()
         self.initUI2() #creation of the GUI
 
     def initUI2(self):
@@ -340,7 +383,7 @@ class TimeSetup(QMainWindow, QWidget):
         AcSummaryEdit = QTextEdit()
         AcSummaryEdit.autoFormatting ()
         self.ActionDisplay2 = AcSummaryEdit
-        self.ActionDisplay2.setText(formatDict(self.set_action))
+        self.ActionDisplay2.setText(formatDict(self.set_action, self.bond_duration_obj2))
 
 #quit button
 
@@ -382,17 +425,54 @@ class TimeSetup(QMainWindow, QWidget):
 
         if reply == QMessageBox.Yes:
             self.close()
+#start event
 
     def startEvent(self):
         print ('STARTING...')
-        self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
-        self.process_trigger_event.start()
+        bondTime = int(self.bond_duration_obj2)
+        #try:
+
+        print('bondtime:{}'.format(bondTime))
+        time_init = time.time()
+        time_current = time.time() - time_init
+
+        if bondTime != 0:
+            round = 0
+            while time_current < bondTime*60:
+                #time_current = time.time() - time_init
+                print('time current before round: {}'.format(time_current))
+                print('bondtime:{}'.format(bondTime*60))
+                self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
+                self.process_trigger_event.start()
+
+
+                time.sleep(35)
+                print('round {} finished'.format(round))
+                time_current = time.time() - time_init
+                print('time current after round: {}'.format(time_current))
+                round= round+1
+
+            #self.stopEvent()#self.process_trigger_event.terminate()
+            #self.close()
+        elif bondTime == 0:
+            print('bondtime is 0')
+            self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
+            self.process_trigger_event.start()
+    #self.process_trigger_event.terminate()
+    #self.close()
+
+        #except ValueError:
+        #    error = QMessageBox()
+        #    error.setText("Please enter a number for chip bonding time")
+        #    error.exec_()
+
+#stop event
 
     def stopEvent(self):
         print('STOPPING')
         self.process_trigger_event.terminate()
         #closeEvent()
-        closeEvent2()
+        self.closeEvent2()
 
 if __name__ == '__main__':
 
