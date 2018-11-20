@@ -1,0 +1,18 @@
+When file modified --> push
+------------------------------
+
+git add test_oli.py
+
+git status
+
+git commit -m "what have been modified"
+
+git push  https://github.com/berenicecharrez/cardiacMPS_micropump.git
+
+--------------
+
+Raspberry : pi/cardiacMPS--> pull
+
+git pull origin master
+
+--------------------
