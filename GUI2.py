@@ -8,7 +8,7 @@ from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QDate, QTime, QEvent
 from multiprocessing import Process
-from test_oli import main_process
+from test_oli import main_process 
 
 # TODO: add degassing valve option
 # add timestep as input
@@ -319,18 +319,18 @@ class Action(QMainWindow, QWidget):
 
         self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 25, 0, 0)    #pump starting at 0 for 25[sec]
 
-        self.ListAction["I1"] = formatActionParam ('VALVE_ACTION', 0, 3, 0, 17) #ac_type, ac_min, ac_sec, t_start, valve_number = None
-        self.ListAction["O1"] = formatActionParam ('VALVE_ACTION', 0, 3, 3, 6)
-        self.ListAction["O2"] = formatActionParam ('VALVE_ACTION', 0, 3, 3, 13)
-        self.ListAction["I2"] = formatActionParam ('VALVE_ACTION', 0, 3, 6, 4)
-        self.ListAction["O3"] = formatActionParam ('VALVE_ACTION', 0, 3, 9, 19)
-        self.ListAction["O4"] = formatActionParam ('VALVE_ACTION', 0, 3, 9, 12)
-        self.ListAction["I3"] = formatActionParam ('VALVE_ACTION', 0, 3, 12, 27)
-        self.ListAction["O5"] = formatActionParam ('VALVE_ACTION', 0, 3, 15, 14)
-        self.ListAction["O6"] = formatActionParam ('VALVE_ACTION', 0, 3, 15, 15)
-        self.ListAction["I4"] = formatActionParam ('VALVE_ACTION', 0, 3, 18, 22)
-        self.ListAction["O7"] = formatActionParam ('VALVE_ACTION', 0, 3, 21, 18)
-        self.ListAction["O8"] = formatActionParam ('VALVE_ACTION', 0, 3, 21, 23)
+        self.ListAction["I1"] = formatActionParam ('VALVE ACTION', 0, 3, 0, 17) #ac_type, ac_min, ac_sec, t_start, valve_number = None
+        self.ListAction["O1"] = formatActionParam ('VALVE ACTION', 0, 3, 3, 6)
+        self.ListAction["O2"] = formatActionParam ('VALVE ACTION', 0, 3, 3, 13)
+        self.ListAction["I2"] = formatActionParam ('VALVE ACTION', 0, 3, 6, 4)
+        self.ListAction["O3"] = formatActionParam ('VALVE ACTION', 0, 3, 9, 19)
+        self.ListAction["O4"] = formatActionParam ('VALVE ACTION', 0, 3, 9, 12)
+        self.ListAction["I3"] = formatActionParam ('VALVE ACTION', 0, 3, 12, 27)
+        self.ListAction["O5"] = formatActionParam ('VALVE ACTION', 0, 3, 15, 14)
+        self.ListAction["O6"] = formatActionParam ('VALVE ACTION', 0, 3, 15, 15)
+        self.ListAction["I4"] = formatActionParam ('VALVE ACTION', 0, 3, 18, 22)
+        self.ListAction["O7"] = formatActionParam ('VALVE ACTION', 0, 3, 21, 18)
+        self.ListAction["O8"] = formatActionParam ('VALVE ACTION', 0, 3, 21, 23)
         #time.sleep(5)
 
         self.ActionDisplay.setText(formatDict(self.ListAction, bond_duration))

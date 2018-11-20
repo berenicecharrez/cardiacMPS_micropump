@@ -2,7 +2,7 @@ import time
 import _thread as thread
 from collections import defaultdict
 from basicFunctions import degasing, openValves, pumping #closeValves
-import heapq
+import heapq 
 
 """
 Takes a dictionary of actions and creates a minimum heap based on start and
