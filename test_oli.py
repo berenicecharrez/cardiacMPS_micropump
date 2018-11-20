@@ -53,9 +53,9 @@ def main_process(set_actions):
     time_init = time.time()
 
     #degasing
-    lock1=thread.allocate_lock()
-    lock1.acquire()
-    t1=thread.start_new_thread(degasing,(lock1,))
+    lock2=thread.allocate_lock()
+    lock2.acquire()
+    t1=thread.start_new_thread(degasing,(lock2,))
 
     action_heap = order_actions(set_actions)
 
@@ -92,7 +92,7 @@ def main_process(set_actions):
                 for lock in active_locks_pump:
                     lock.release()
 
-        elif saca['type'] == 'VALVE_ACTION':
+        elif saca['type'] == 'VALVE ACTION':
             if current_action[2] == 'start':# and saca['valve option'] == 'OPENING':
                 #print('valve to be opened')
                 lock1 = opening_valve(saca['valve number'])
@@ -122,8 +122,8 @@ def main_process(set_actions):
         #time.sleep(1)
 
     print ('{} I am done'.format(time.time() - time_init))
-    lock1.release()
-    time.sleep(2)
+    lock2.release()
+    time.sleep(5)
     #status = 1
 
     #return status

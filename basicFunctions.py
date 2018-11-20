@@ -6,7 +6,7 @@ try:
 	GPIO.setmode(GPIO.BCM)
 	for x in valves:
 	    GPIO.setup(x, GPIO.OUT)
-	    GPIO.output(x, 0)
+	    GPIO.output(x, 1) #1 is closed
 except:
 	pass
 
@@ -14,7 +14,7 @@ def set_gpio_output(valve, state):
 	try:
 		GPIO.output(valve, state)
 	except:
-		pass#print('cant access GPIO')
+		print('cant access GPIO')
 
 
 def degasing(lock, valve = 5):
@@ -23,6 +23,7 @@ def degasing(lock, valve = 5):
 	while lock.locked():
 		set_gpio_output(valve, 0)
 
+	set_gpio_output(valve, 1)
 	print('degasing stopped')
 
 def openValves(valve, lock1):
@@ -32,7 +33,7 @@ def openValves(valve, lock1):
 		set_gpio_output(valve, 0)
 
 	set_gpio_output(valve, 1)
-	#print('Valve is closed2: {}'.format(valve))
+	print('Valve is closed2: {}'.format(valve))
 
 #def closeValves(valve):
 #	print('valve is closing')

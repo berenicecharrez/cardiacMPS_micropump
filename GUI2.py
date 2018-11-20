@@ -438,7 +438,7 @@ class TimeSetup(QMainWindow, QWidget):
 
         if bondTime != 0:
             round = 0
-            while time_current < bondTime*60:
+            while time_current < bondTime*2*60*60:
                 #time_current = time.time() - time_init
                 print('time current before round: {}'.format(time_current))
                 print('bondtime:{}'.format(bondTime*60))
