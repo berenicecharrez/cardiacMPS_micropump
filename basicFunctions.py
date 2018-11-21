@@ -1,4 +1,4 @@
-from time import sleep 
+from time import sleep
 
 try:
 	import RPi.GPIO as GPIO
@@ -14,7 +14,7 @@ def set_gpio_output(valve, state):
 	try:
 		GPIO.output(valve, state)
 	except:
-		print('cant access GPIO')
+		pass #print('cant access GPIO')
 
 
 def degasing(lock, valve = 5):

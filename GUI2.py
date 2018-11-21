@@ -1,5 +1,6 @@
 import sys
 import time
+import heapq
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (QWidget, QToolTip, QHBoxLayout, QVBoxLayout,
     QPushButton, QApplication, QMessageBox, QMainWindow, QAction, qApp, QMenu, QLabel, QLineEdit,
@@ -8,7 +9,7 @@ from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QDate, QTime, QEvent
 from multiprocessing import Process
-from test_oli import main_process 
+from test_oli import main_process
 
 # TODO: add degassing valve option
 # add timestep as input
@@ -314,6 +315,7 @@ class Action(QMainWindow, QWidget):
     def chip_bonding(self):
 
         bond_duration = self.bond_duration_obj.text()
+        bondMin = int(bond_duration)#int(bond_duration*60)
 
         print('called chip bonding')
 
@@ -331,9 +333,34 @@ class Action(QMainWindow, QWidget):
         self.ListAction["I4"] = formatActionParam ('VALVE ACTION', 0, 3, 18, 22)
         self.ListAction["O7"] = formatActionParam ('VALVE ACTION', 0, 3, 21, 18)
         self.ListAction["O8"] = formatActionParam ('VALVE ACTION', 0, 3, 21, 23)
-        #time.sleep(5)
+        self.ListAction["SLEEP"] = formatActionParam ('VALVE ACTION', 0, 35, 25, 0)
+
+        #time.sleep(35)
 
         self.ActionDisplay.setText(formatDict(self.ListAction, bond_duration))
+
+        for i in range (1, bondMin):
+            #print(i)
+            #print('BondSetAction2: {}'.format(self.ListAction))
+            self.ListAction["PUMP, round{}".format(i)] = formatActionParam ('PUMP', 0, 25+i*60, 0+i*60, 0)    #pump starting at 0 for 25[sec]
+
+            self.ListAction["I1, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 0+i*60, 17) #ac_type, ac_min, ac_sec, t_start, valve_number = None
+            self.ListAction["O1, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 3+i*60, 6)
+            self.ListAction["O2, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 3+i*60, 13)
+            self.ListAction["I2, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 6+i*60, 4)
+            self.ListAction["O3, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 9+i*60, 19)
+            self.ListAction["O4, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 9+i*60, 12)
+            self.ListAction["I3, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 12+i*60, 27)
+            self.ListAction["O5, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 15+i*60, 14)
+            self.ListAction["O6, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 15+i*60, 15)
+            self.ListAction["I4, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 18+i*60, 22)
+            self.ListAction["O7, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 21+i*60, 18)
+            self.ListAction["O8, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 21+i*60, 23)
+
+            self.ListAction["SLEEP, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 35+i*60, 25+i*60, 0)
+
+            i=i+1
+            #print(self.ListAction)
 
 #if press Next button go to next window for time setup
     def GoToNext (self):
@@ -368,6 +395,7 @@ class TimeSetup(QMainWindow, QWidget):
         self.wid2 = QWidget()
         self.ActionDisplay2 = ''
         self.set_action = set_action
+        #self.BondSet_action = {}
         self.process_trigger_event = None
         self.bond_duration_obj2 = bond_duration.text()
         self.initUI2() #creation of the GUI
@@ -429,35 +457,41 @@ class TimeSetup(QMainWindow, QWidget):
 
     def startEvent(self):
         print ('STARTING...')
-        bondTime = int(self.bond_duration_obj2)
+        bondTime = float(self.bond_duration_obj2)
         #try:
 
-        print('bondtime:{}'.format(bondTime))
+        print('bondtime:{} hours'.format(bondTime))
         time_init = time.time()
         time_current = time.time() - time_init
 
-        if bondTime != 0:
-            round = 0
-            while time_current < bondTime*2*60*60:
-                #time_current = time.time() - time_init
-                print('time current before round: {}'.format(time_current))
-                print('bondtime:{}'.format(bondTime*60))
-                self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
-                self.process_trigger_event.start()
+        self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
+        self.process_trigger_event.start()
+
+#        if bondTime != 0:
+#            round = 0
+#            while time_current < bondTime*2*60*60:
+#                #time_current = time.time() - time_init
+#                print('time current before round: {}'.format(time_current))
+#                print('bondtime:{}'.format(bondTime*60))
+#                self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
+#                self.process_trigger_event.start()
 
 
-                time.sleep(35)
-                print('round {} finished'.format(round))
-                time_current = time.time() - time_init
-                print('time current after round: {}'.format(time_current))
-                round= round+1
+#                time.sleep(35)
+#                print('round {} finished'.format(round))
+#                time_current = time.time() - time_init
+#                print('time current after round: {}'.format(time_current))
+#                round= round+1
 
-            #self.stopEvent()#self.process_trigger_event.terminate()
-            #self.close()
-        elif bondTime == 0:
-            print('bondtime is 0')
-            self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
-            self.process_trigger_event.start()
+            #self.stopEvent()
+            #self.process_trigger_event.terminate()
+
+#        elif bondTime == 0:
+#            print('bondtime is 0')
+#            self.process_trigger_event = Process(target = main_process, args = (self.set_action,))
+#           self.process_trigger_event.start()
+
+
     #self.process_trigger_event.terminate()
     #self.close()
 
