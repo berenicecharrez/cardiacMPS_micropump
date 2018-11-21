@@ -346,30 +346,24 @@ class Action(QMainWindow, QWidget):
         ac_secs = [25] + 12*[3] + [35]
         t_starts = [0, 0, 3, 3, 6, 9, 9, 12, 15, 15, 18, 21, 21, 25]
         valve_numbers = [0, 17, 6, 13, 4, 19, 12, 27, 14, 15, 22, 18, 23, 0]
-        ac_min, ac_sec = 0, 3
         
-        for (key, action, ac_min, ac_sec, t_start, valve_number) in \
-                zip(keys, actions, ac_mins, ac_secs, t_starts, valve_numbers):
-            self.listAction[key] = formatActionParam(action, ac_min,
-                    ac_sec, t_start, valve_number)
-        
-        #time.sleep(35)
-
-        self.actionDisplay.setText(formatDict(self.listAction, bond_duration))
-
-        for i in range (1, bondMin):
+        for i in range (bondMin):
             #print(i)
             #print('BondSetAction2: {}'.format(self.listAction))
             
             for (key, action, ac_min, ac_sec, t_start, valve_number) in \
                     zip(keys, actions, ac_mins, ac_secs, t_starts, valve_numbers):
-                _key = key + ", round{}".format(i)
+                _key = key + (", round{}".format(i) if (i > 0) else "")
                 _sec = ac_secs + i*60          # wouldn't this really be minutes?
                 _t_start = t_start + i*60
 
                 self.listAction[_key] = formatActionParam(action, ac_min, \
                         _sec, _t_start, valve_number)
-            
+           
+            # print something for first round
+            if i is 0:
+                self.actionDisplay.setText(formatDict(self.listAction, bond_duration))
+ 
             i=i+1 # ??
 
             #print(self.listAction)
