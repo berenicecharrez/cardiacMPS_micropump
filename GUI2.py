@@ -350,7 +350,7 @@ class Action(QMainWindow, QWidget):
         
         for (key, action, ac_min, ac_sec, t_start, valve_number) in \
                 zip(keys, actions, ac_mins, ac_secs, t_starts, valve_numbers):
-            self.listAction(key) = formatActionParam(action, ac_min,
+            self.listAction[key] = formatActionParam(action, ac_min,
                     ac_sec, t_start, valve_number)
         
         #time.sleep(35)
