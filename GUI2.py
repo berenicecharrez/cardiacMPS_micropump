@@ -2,9 +2,10 @@ import sys
 import time
 import heapq
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import (QWidget, QToolTip, QHBoxLayout, QVBoxLayout,
-    QPushButton, QApplication, QMessageBox, QMainWindow, QAction, qApp, QMenu, QLabel, QLineEdit,
-    QTextEdit, QGridLayout, QSlider, QLCDNumber, QComboBox)
+from PyQt5.QtWidgets import QWidget, QToolTip, QHBoxLayout, QVBoxLayout, \
+        QPushButton, QApplication, QMessageBox, QMainWindow, QAction, \
+        qApp, QMenu, QLabel, QLineEdit, QTextEdit, QGridLayout, QSlider, \
+        QLCDNumber, QComboBox
 from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QDate, QTime, QEvent
@@ -13,7 +14,7 @@ from test_oli import main_process
 
 # TODO: add degassing valve option
 # add timestep as input
-#make look nicer
+# make look nicer
 
 
 """
@@ -27,7 +28,8 @@ print("Universal datetime: ", now.toUTC().toString(Qt.ISODate))
 #difference between universal time and local time in seconds
 print("The offset from UTC is: {0} seconds".format(now.offsetFromUtc()))
 """
-def formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number = None):#, valve_option = None):
+def formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number = None):
+    #, valve_option = None):
     ret = {}
 
     ret['type'] = ac_type
@@ -40,18 +42,30 @@ def formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number = None):#,
     return ret
 
 def formatDict (listAction, bond_duration):
-    aux = 'Bond Duration is of {} hours\n'.format(bond_duration)
+    aux = "Bond Duration is of {} hours\n".format(bond_duration)
 
     for _name, _list_param in listAction.items():
 
+        # explanation: use short local names: better readability,
+        # and you'll use less time typing them out
+
+        _type, _min, _sec, _start = \
+                _list_param["type"], _list_param["minutes"], \
+                _list_param["seconds"], list_param["start"]
+
+        # explanation: try to split operations if they go over multiple
+        # lines (max widht 80), and to find common factors you can pull 
+        # outside any if test, for loop, etc
+
+        aux += "{0}: {1} ".format(_name, _list_param["type"])
+
         if _list_param['type'] == 'PUMP':
-
-            aux += '{0}: {1} for a duration of {2} [min] {3} [sec], starting at {4} [sec]\n'.format(_name, _list_param['type'],
-                _list_param['minutes'], _list_param['seconds'], _list_param['start'])
-
+            aux += "for a duration of {2} [min] {3} [sec]".format(_min, _sec)
         else:
-            aux += '{0}: {1} -->  There will be opening of Valve # {2} for a duration of {3} [min] {4} [sec], starting at {5} [sec]\n'.format(_name, _list_param['type'], \
-            _list_param['valve number'], _list_param['minutes'], _list_param['seconds'], _list_param['start'])
+            _valno = _list_param["valve number"]
+            aux += "-->  There will be opening of Valve # {2} ".format(_valno)
+            aux += "for a duration of {3} [min] {4} [sec]".format(_min, _sec)
+        aux += ", starting at {4} [sec]\n".format(_start)
 
     return aux
 
@@ -70,15 +84,19 @@ class Action(QMainWindow, QWidget):
         self.t_start_obj = None
         self.bond_duration_obj = None
 
+        # explanation: variables starts with lower case, by convention
 
-        self.ActionDisplay = ''
+        self.actionDisplay = ''
 
-        self.ListAction = {} #dictionary
+        self.listAction = {} #dictionary
 
         #default dictionary
-        #self.ListAction["OPEN"] = formatActionParam ('VALVE_ACTION', 0, 20, 0, 4)#, 'OPENING')
-        #self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 16, 5, 0)#, 'NO_VALVE')
-        #self.ListAction["OPEN2"] = formatActionParam ('VALVE_ACTION', 0, 20, 10, 17)#, 'OPENING')
+        #self.listAction["OPEN"] = formatActionParam ('VALVE_ACTION', \
+                #0, 20, 0, 4)#, 'OPENING')
+        #self.listAction["PUMP"] = formatActionParam ('PUMP', \
+                #0, 16, 5, 0)#, 'NO_VALVE')
+        #self.listAction["OPEN2"] = formatActionParam ('VALVE_ACTION', \
+                #0, 20, 10, 17)#, 'OPENING')
 
         self.wid = QWidget()
         self.time_setup = None
@@ -162,7 +180,7 @@ class Action(QMainWindow, QWidget):
         AcList = QLabel('Action list', self)
         AcListEdit = QTextEdit()
         AcListEdit.autoFormatting ()
-        self.ActionDisplay = AcListEdit
+        self.actionDisplay = AcListEdit
 
 #valve option button
         Valvebtn = QPushButton('Add Action', self)
@@ -304,8 +322,8 @@ class Action(QMainWindow, QWidget):
                 valve_option = None
                 valve_number = None
             """
-            self.ListAction[self.ac_name_obj.text()] = formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number)#, valve_option)
-            self.ActionDisplay.setText(formatDict(self.ListAction, bondTime))
+            self.listAction[self.ac_name_obj.text()] = formatActionParam (ac_type, ac_min, ac_sec, t_start, valve_number)#, valve_option)
+            self.actionDisplay.setText(formatDict(self.listAction, bondTime))
 
         except ValueError:
             error = QMessageBox()
@@ -318,49 +336,43 @@ class Action(QMainWindow, QWidget):
         bondMin = int(bond_duration)#int(bond_duration*60)
 
         print('called chip bonding')
+        
+        # explanation: repetative operation --> for loop
 
-        self.ListAction["PUMP"] = formatActionParam ('PUMP', 0, 25, 0, 0)    #pump starting at 0 for 25[sec]
-
-        self.ListAction["I1"] = formatActionParam ('VALVE ACTION', 0, 3, 0, 17) #ac_type, ac_min, ac_sec, t_start, valve_number = None
-        self.ListAction["O1"] = formatActionParam ('VALVE ACTION', 0, 3, 3, 6)
-        self.ListAction["O2"] = formatActionParam ('VALVE ACTION', 0, 3, 3, 13)
-        self.ListAction["I2"] = formatActionParam ('VALVE ACTION', 0, 3, 6, 4)
-        self.ListAction["O3"] = formatActionParam ('VALVE ACTION', 0, 3, 9, 19)
-        self.ListAction["O4"] = formatActionParam ('VALVE ACTION', 0, 3, 9, 12)
-        self.ListAction["I3"] = formatActionParam ('VALVE ACTION', 0, 3, 12, 27)
-        self.ListAction["O5"] = formatActionParam ('VALVE ACTION', 0, 3, 15, 14)
-        self.ListAction["O6"] = formatActionParam ('VALVE ACTION', 0, 3, 15, 15)
-        self.ListAction["I4"] = formatActionParam ('VALVE ACTION', 0, 3, 18, 22)
-        self.ListAction["O7"] = formatActionParam ('VALVE ACTION', 0, 3, 21, 18)
-        self.ListAction["O8"] = formatActionParam ('VALVE ACTION', 0, 3, 21, 23)
-        self.ListAction["SLEEP"] = formatActionParam ('VALVE ACTION', 0, 35, 25, 0)
-
+        keys = ["PUMP", "I1", "O1", "O2", "I2", "O3", "O4", "I3", "O5", \
+                "O6", "I4", "O7", "O8", "SLEEP"]
+        actions = ["PUMP"] + 13*["VALVE_ACTION"]
+        ac_mins = [0]*14
+        ac_secs = [25] + 12*[3] + [35]
+        t_starts = [0, 0, 3, 3, 6, 9, 9, 12, 15, 15, 18, 21, 21, 25]
+        valve_numbers = [0, 17, 6, 13, 4, 19, 12, 27, 14, 15, 22, 18, 23, 0]
+        ac_min, ac_sec = 0, 3
+        
+        for (key, action, ac_min, ac_sec, t_start, valve_number) in \
+                zip(keys, actions, ac_mins, ac_secs, t_starts, valve_numbers):
+            self.listAction(key) = formatActionParam(action, ac_min,
+                    ac_sec, t_start, valve_number)
+        
         #time.sleep(35)
 
-        self.ActionDisplay.setText(formatDict(self.ListAction, bond_duration))
+        self.actionDisplay.setText(formatDict(self.listAction, bond_duration))
 
         for i in range (1, bondMin):
             #print(i)
-            #print('BondSetAction2: {}'.format(self.ListAction))
-            self.ListAction["PUMP, round{}".format(i)] = formatActionParam ('PUMP', 0, 25+i*60, 0+i*60, 0)    #pump starting at 0 for 25[sec]
+            #print('BondSetAction2: {}'.format(self.listAction))
+            
+            for (key, action, ac_min, ac_sec, t_start, valve_number) in \
+                    zip(keys, actions, ac_mins, ac_secs, t_starts, valve_numbers):
+                _key = key + ", round{}".format(i)
+                _sec = ac_secs + i*60          # wouldn't this really be minutes?
+                _t_start = t_start + i*60
 
-            self.ListAction["I1, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 0+i*60, 17) #ac_type, ac_min, ac_sec, t_start, valve_number = None
-            self.ListAction["O1, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 3+i*60, 6)
-            self.ListAction["O2, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 3+i*60, 13)
-            self.ListAction["I2, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 6+i*60, 4)
-            self.ListAction["O3, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 9+i*60, 19)
-            self.ListAction["O4, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 9+i*60, 12)
-            self.ListAction["I3, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 12+i*60, 27)
-            self.ListAction["O5, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 15+i*60, 14)
-            self.ListAction["O6, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 15+i*60, 15)
-            self.ListAction["I4, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 18+i*60, 22)
-            self.ListAction["O7, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 21+i*60, 18)
-            self.ListAction["O8, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 3+i*60, 21+i*60, 23)
+                self.listAction[_key] = formatActionParam(action, ac_min, \
+                        _sec, _t_start, valve_number)
+            
+            i=i+1 # ??
 
-            self.ListAction["SLEEP, round{}".format(i)] = formatActionParam ('VALVE ACTION', 0, 35+i*60, 25+i*60, 0)
-
-            i=i+1
-            #print(self.ListAction)
+            #print(self.listAction)
 
 #if press Next button go to next window for time setup
     def GoToNext (self):
@@ -383,7 +395,7 @@ class Action(QMainWindow, QWidget):
     def NewWindow(self):
         #action = Action()
         #action.close()
-        self.time_setup = TimeSetup(self.ListAction, self.bond_duration_obj)
+        self.time_setup = TimeSetup(self.listAction, self.bond_duration_obj)
         self.time_setup.show()
 #------------------------------------------------------------------------------------
 
@@ -393,7 +405,7 @@ class TimeSetup(QMainWindow, QWidget):
         super().__init__()
 
         self.wid2 = QWidget()
-        self.ActionDisplay2 = ''
+        self.actionDisplay2 = ''
         self.set_action = set_action
         #self.BondSet_action = {}
         self.process_trigger_event = None
@@ -410,8 +422,8 @@ class TimeSetup(QMainWindow, QWidget):
         AcSummary = QLabel('Action Summary', self)
         AcSummaryEdit = QTextEdit()
         AcSummaryEdit.autoFormatting ()
-        self.ActionDisplay2 = AcSummaryEdit
-        self.ActionDisplay2.setText(formatDict(self.set_action, self.bond_duration_obj2))
+        self.actionDisplay2 = AcSummaryEdit
+        self.actionDisplay2.setText(formatDict(self.set_action, self.bond_duration_obj2))
 
 #quit button
 
